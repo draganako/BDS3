@@ -1,0 +1,22 @@
+version: "3"
+
+services:
+  # BigData3 - Spark model-training
+  submit:
+    build: ./batch-model-training
+    image: model-training:latest
+    container_name: submit
+    environment:
+      HDFS_URL: hdfs://hadoop-master:9000
+      APP_ARGS_CSV_FILE_PATH: /big-data/data.csv
+      SPARK_MASTER_NAME: spark-master
+      INDEXERS_PATH: /big-data/indexers/ # /big-data/indexers-lr/ 
+      MODEL_PATH: /big-data/model/ # /big-data/logistic-reg/ 
+      SPARK_MASTER_PORT: 7077
+      SPARK_APPLICATION_ARGS: ""
+      ENABLE_INIT_DAEMON: "false"
+      
+networks:
+  default:
+    external:
+      name: hadoop

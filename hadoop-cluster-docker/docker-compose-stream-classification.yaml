@@ -1,0 +1,55 @@
+version: "3"
+
+services:
+  # BigData3 - Spark stream classification
+  stream-classification:
+    build: ./stream-classification
+    image: stream-classification:latest
+    container_name: stream-classification
+    depends_on: 
+      - kafka
+      - stream-producer
+    environment:
+      INITIAL_SLEEP_TIME_IN_SECONDS: 40
+      SPARK_MASTER_NAME: spark-master
+      SPARK_MASTER_PORT: 7077
+      SPARK_APPLICATION_ARGS: ''
+      INDEXERS_PATH: /big-data/indexers/
+      MODEL_PATH: /big-data/model/
+      HDFS_URL: hdfs://hadoop-master:9000
+      KAFKA_URL: kafka:9092
+      ENABLE_INIT_DAEMON: 'false'
+      DATA_RECEIVING_TIME_IN_SECONDS: 30
+
+  stream-producer:
+    build: ./stream-producer
+    image: stream-producer:latest
+    container_name: stream-producer
+    depends_on: 
+      - kafka
+    environment:
+      INITIAL_SLEEP_TIME_IN_SECONDS: 20
+      PUBLISH_INTERVAL_IN_SEC: 5
+      HDFS_URL: hdfs://hadoop-master:9000
+      CSV_FILE_PATH: /big-data/data.csv
+      KAFKA_URL: kafka:9092
+
+  # KAFKA
+  zookeeper:
+    image: wurstmeister/zookeeper:3.4.6
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+  kafka:
+    image: wurstmeister/kafka:2.12-2.4.0
+    container_name: kafka
+    expose:
+      - "9092"
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_HOST_NAME: kafka
+      
+networks:
+  default:
+    external:
+      name: hadoop

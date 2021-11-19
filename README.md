@@ -223,15 +223,15 @@ Sada je fajl spreman za preuzimanje sa HDFS-a i obradu.
 
 Nakon pokretanja hadoop kontejnera, treba pokrenuti najpre spark kontejnere:
 
-* `docker-compose 'f docker-compose.yaml up -d --build --force-recreate`
+* `docker-compose -f docker-compose.yaml up -d --build --force-recreate`
 
 Zatim treba pokrenuti treniranje modela:
 
-* `docker-compose 'f docker-compose-model-training.yaml up -d --build --force-recreate`
+* `docker-compose -f docker-compose-model-training.yaml up -d --build --force-recreate`
 
 Na kraju se kreirani model testira:
 
-* `docker-compose 'f docker-compose-stream-classification.yaml up -d --build --force-recreate`
+* `docker-compose -f docker-compose-stream-classification.yaml up -d --build --force-recreate`
 
 ## Rad aplikacije
 

@@ -1,16 +1,16 @@
-## Struktura projekta
+## Project structure
 
-Projekat predstavlja aplikacije napisane u programskom jeziku Java za treniranje modela podataka za predikciju kašnjenja leta
-na osnovu vremenskih uslova i aerodroma u Americi. Aplikacija se izvršava
-na klasteru Docker kontejnera koji se pokreću na osnovu gotovih image-a. Struktura projekta se može videti u nastavku. 
+The project represents Java applications that train a data model to predict flight delays based on 
+weather conditions and airports in the United States, executed on a cluster of Docker containers and defined by open-source images.
+The structure of the project can be seen below.
 
-Direktorijum `config`, kao i datoteke `Dockerfile`, `build-image.sh`, `LICENSE`, `README.md` i skripte `resize-cluster.sh` i `start-container.sh` vezane su za [korišćeni 
-Hadoop klaster](https://github.com/kiwenlau/hadoop-cluster-docker). U fajlu `.project` nalazi se opis projekta, dok `docker-compose.yaml`, 
-`docker-compose-model-training.yaml` i `docker-compose-stream-classification.yaml` služe za opis korišćenih servisa.
-Folderi `stream-producer`, `batch-model-training` i `stream-classification` su kreirani u okruženju Eclipse kao Maven projekti. Oni sadrže folder `src/main/java/com/spark`,
- gde se nalazi odgovarajuća aplikacija (`App.java`), kao i pomoćne klase. Datoteka `.classpath` sadrži putanje korisnički definisanih klasa,
- paketa i resursa projekta, dok `.project` sadrži njegove build parametre. U datoteci `pom.xml` nalaze se informacije o projektu, kao što
- su servisi koji se koriste, dodaci za kompajliranje i dr. Folder `.settings` namenjen je preferencama projekta. Za pokretanje aplikacija u docker kontejneru dodate su i datoteke `Dockerfile` i `start.sh`.
+The `config` directory, as well as the files `Dockerfile`, `build-image.sh`, `LICENSE`, `README.md` and the scripts `resize-cluster.sh` and `start-container.sh` are linked to [used 
+Hadoop cluster](https://github.com/kiwenlau/hadoop-cluster-docker). In the file `.project` there is a description of the project, while `docker-compose.yaml`, 
+`docker-compose-model-training.yaml` and `docker-compose-stream-classification.yaml` serve to describe the services used.
+The folders `stream-producer`, `batch-model-training` and `stream-classification` are created in the Eclipse environment as Maven projects. They contain the folder `src/main/java/com/spark`,
+ where the corresponding application (`App.java`) is located, as well as the helper classes. The `.classpath` file contains user-defined class paths,
+ package and project resources, while `.project` contains its build parameters. The `pom.xml` file contains data about the project, such as
+ services used, plugins for compiling, etc. The `.settings` folder is intended for project preferences. `Dockerfile` and `start.sh` files have been added to run applications in the docker container.
 
 ```bash
 hadoop-cluster-docker/
@@ -69,23 +69,20 @@ hadoop-cluster-docker/
  |resize-cluster.sh
  |start-container.sh
 ```
-## Korišćeni skup podataka
+## Used dataset
 
-Podaci nad kojima treba izvršiti analizu preuzeti su sa [ove lokacije](https://www.kaggle.com/threnjen/2019-airline-delays-and-cancellations) kao csv dokument. 
-Stavke dokumenta predstavljaju podatke prikupljene o praćenim letovima u Americi u periodu od januara do marta 2020, pri čemu je objašnjeno
- koja su značenja različitih tipova podataka koji su prisutni.
-Prvu vrstu dokumenta čine nazivi odgovarajućih podataka, a ostale njihove vrednosti. 
+The data to be analyzed was downloaded from [this location](https://www.kaggle.com/threnjen/2019-airline-delays-and-cancellations) as a CSV document. 
+The document items represent data gathered on tracked flights in America between January and March 2020 with the definitions of the various data types present.
+The first row of the document represents the names of the corresponding data and the other rows represent collected values.
 
-## Infrastruktura
+## Infrastructure
 
-Aplikacija se izvršava na lokalnom klasteru Docker kontejnera. Hadoop klaster čini master i dva slave-a,
-koji se pokreću u svojim kontejnerima (postupak opisan u `hadoop-cluster-docker/README.md`). 
-Na kreiranoj mreži `hadoop` se pokreću i
-ostali kontejneri, najpre spark master i worker, opisani u `docker-compose.yaml` 
-([Big Data Europe](https://hub.docker.com/u/bde2020)), 
-a zatim `cassandra` (zvanični docker image), kafka i zookeeper 
-([wurstmeister](https://hub.docker.com/u/wurstmeister) image), `stream-producer`, `submit` (kontejner za treniranje modela) i `stream-classification`, 
-definisani u `docker-compose-model-training.yaml` i `docker-compose-stream-classification.yaml`. Pre pokretanja aplikacije potrebno je uneti podatke u HDFS.
+The application runs on a local cluster of Docker containers. A Hadoop cluster consists of a master and two slaves,
+that run in their containers (procedure described in `hadoop-cluster-docker/README.md`). 
+The other containers run on the created `hadoop` network, primarily Spark master and worker, described in `docker-compose.yaml` 
+([Big Data Europe](https://hub.docker.com/u/bde2020)), and then `cassandra` (the official docker image), `kafka` and `zookeeper` 
+([wurstmeister](https://hub.docker.com/u/wurstmeister) image), `stream-producer`, `submit` (container for training models) and `stream-classification`, 
+defined in `docker-compose-model-training.yaml` and `docker-compose-stream-classification.yaml`. Before running the application, the data must be loaded into HDFS.
 
 **docker-compose.yaml:**
 
@@ -205,57 +202,52 @@ networks:
 ```
 
 
-## Unos podataka
+## Data input
 
-Pomenute podatke treba preuzeti [ovde](https://www.kaggle.com/threnjen/2019-airline-delays-and-cancellations) i prekopirati ih 
-u Hadoop mnt direktorijum:
+The mentioned data should be downloaded [here](https://www.kaggle.com/threnjen/2019-airline-delays-and-cancellations) and copied 
+to the Hadoop mnt directory:
 
 * `docker cp /<local_repo>/<data_file_name> hadoop-master:/mnt/data.csv`
 
-Zatim u konzoli hadoop master-a treba kreirati folder big-data i uneti prethodno pomenutu datoteku:
+Then, in the hadoop master console, a big-data folder should be created with the previously mentioned file:
 
 * `hdfs dfs -mkdir /big-data`
 * `hdfs dfs -put /mnt/data.csv /big-data/data.csv`
 
-Sada je fajl spreman za preuzimanje sa HDFS-a i obradu.
+Now the file is ready to be downloaded from HDFS and processed.
 
-## Pokretanje aplikacije
+## Running the application
 
-Nakon pokretanja hadoop kontejnera, treba pokrenuti najpre spark kontejnere:
+After starting the hadoop container, the spark containers should be started first:
 
 * `docker-compose -f docker-compose.yaml up -d --build --force-recreate`
 
-Zatim treba pokrenuti treniranje modela:
+Then the model training should be executed:
 
 * `docker-compose -f docker-compose-model-training.yaml up -d --build --force-recreate`
 
-Na kraju se kreirani model testira:
+In the end, the testing of the created model should be executed:
 
 * `docker-compose -f docker-compose-stream-classification.yaml up -d --build --force-recreate`
 
-## Rad aplikacije
+## Application execution
 
-Skripta `start.sh` u svakom od foldera aplikacija pokreće gotovu `template.sh` skriptu za pokretanje njihovih
-kontejnera.
+The `start.sh` script in each of the application folders runs ready-made `template.sh` scripts to start up the corresponding
+containers.
 
 ### Stream producer
 
-Aplikacija `stream-producer` čita jednu po jednu liniju skupa podataka sa HDFS-a i šalje je na
-Kafka `planes` topic.  
+The `stream-producer` application reads the data from HDFS line by line and sends it to Kafka `planes` topic.
 
 ### Batch model training
 
-Aplikacija `batch-model-training` služi da trenira ML model da predvidi da li će doći do otkazivanja leta u zavisnosti od parametara
-kao što su mesec u godini, doba dana polaska, starost aviona, kiša, sneg i drugi.   
-Korišćen je *random forest model*, sa kojim se postiže preciznost predviđanja od oko 87% i sačuvan na HDFS-u uz objekte koji obrađuju
-preuzete podatke pre slanja modelu - indeksere. 
+The `batch-model-training` application is utilized to train an ML (random forest) model to predict whether a flight will be canceled, depending on parameters such as month of the year, day and time of departure, age of the aircraft, rain, snow and others. The model achieves a prediction accuracy of about 87% and is stored on HDFS with objects that process the downloaded data before sending it to the model – indexers.
 
 ### Stream classification
 
-Aplikacija `stream-classification` učitava model i indeksere sa HDFS-a i dodeljuje mu podatke preuzete sa `planes` Kafka topic-a, vrši klasifikaciju i
-i prikazuje rezultate. 
+The `stream-classification` application loads the model and indexers from HDFS and assigns it data taken from the Kafka topic (`planes`), performs the classification and displays the results. 
 
-## Nadgledanje rada
+## Application monitoring
 
-Izlaz koji aplikacije i servisi štampaju u konzoli može se videti preko prozora Docker Tooling u okruženju Eclipse, nakon povezivanja
-na aktivnu socket konekciju i izbora željenog kontejnera.
+The output that applications and services print to the console can be viewed through the Docker Tooling window in the Eclipse environment, after connecting
+to the active socket connection and choosing the desired container.

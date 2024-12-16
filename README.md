@@ -80,8 +80,7 @@ The first row of the document represents the names of the corresponding data and
 The application runs on a local cluster of Docker containers. A Hadoop cluster consists of a master and two slaves,
 that run in their containers (procedure described in `hadoop-cluster-docker/README.md`). 
 The other containers run on the created `hadoop` network, primarily Spark master and worker, described in `docker-compose.yaml` 
-([Big Data Europe](https://hub.docker.com/u/bde2020)), and then `cassandra` (the official docker image), `kafka` and `zookeeper` 
-([wurstmeister](https://hub.docker.com/u/wurstmeister) image), `stream-producer`, `submit` (container for training models) and `stream-classification`, 
+([Big Data Europe](https://hub.docker.com/u/bde2020)), and then `kafka` and `zookeeper` ([wurstmeister](https://hub.docker.com/u/wurstmeister) image), `stream-producer`, `submit` (container for training models) and `stream-classification`, 
 defined in `docker-compose-model-training.yaml` and `docker-compose-stream-classification.yaml`. Before running the application, the data must be loaded into HDFS.
 
 **docker-compose.yaml:**
